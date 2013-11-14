@@ -20,11 +20,14 @@ body,td,th {
 <p>&nbsp;</p>
 <img src="$imageRef" />
 <p>&nbsp;</p>
+<p>$resultMessage</p>
 <form role="form">
 <div class="form-group">
 <p>What is the next connection to be made in the graph?</p>
-<input type="text" name="nextConnection" />
+<p>
+  <input type="text" name="nextConnection" />
 <input type="hidden" name="graphDetails" value="$graphDetails" />
+</p>
 </div>
 </form>
 </body>

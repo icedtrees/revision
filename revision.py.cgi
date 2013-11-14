@@ -1,4 +1,4 @@
-#!C:\Python27\python.exe
+#!C:\Python27-32\python.exe
 
 #-------------------------------------------------------------------------------
 # Name:        revision
@@ -33,23 +33,53 @@ class WeightedGraph(object):
                         graph[(start, end)] = random.randint(1, 100)
         return graph
 
+    def graph_details(self): # Converts graph details to string format
+        return str([self.connections, self.traversed, self.start])
+
+    def load_details(self, detailString): # Loads all the details
+        details = eval(detailString)
+        self.connections = details[0]
+        self.traversed = details[1]
+        self.start = details[3]
+
+    def __init__(self, previousConnections):
+        if previousConnections:
+            self.load(details(previousConnections))
+        else:
+            self.connections = self.new_graph()
+            self.traversed = [] # format (start, end)
+            self.start = random.randint(0, 5)
+
+
     def get_position(self, pointIndex): # center is 300, 300, radius is 200
         angle = 2 * math.pi * pointIndex / 5
         xPosition = math.sin(angle) * 200 + 300
         yPosition = math.cos(angle) * 200 + 300
         return (int(xPosition), int(yPosition))
 
-    def __init__(self):
-        self.connections = self.new_graph()
-        self.traversed = [] # format (start, end)
-        self.start = random.randint(0, 5)
-
     def add_traversal(self, connection):
         self.traversed.append(connection)
 
-    def next_dijkstra(graph):
+    def next_dijkstra(self):
+        stackTrace = [-1] * 5
+        distance = [-1] * 5
+        distance[self.start] = 0
         for traversal in self.traversed:
-            pass
+            stackTrace[traversal[1]] = traversal[0]
+            current = traversal[1]
+            totalDistance = 0
+            while (current != self.start):
+                previousMove = (current, stackTrace[current])
+                totalDistance += self.connections[sorted(previousMove)]
+                current = stackTrace(current)
+            distance[traversal[1]] = totalDistance
+        minPoint, minLength = (-1, -1), 1000
+        for start in [point for point in range(5) if distance[point] != -1]: # visited
+            for adjacent in [point for point in range(5) if sorted((start, point)) in self.connections and distance[point] == -1]: # unvisited
+                if distance[start] + self.connections[sorted((start, point))] < minLength:
+                    minPoint = sorted((start,adjacent))
+                    minLength = distance[start] + self.connections[sorted((start, point))]
+        return minPoint
 
 
     def save_graph_image(self): # saves the graph as an image and returns filepath
@@ -76,19 +106,17 @@ class WeightedGraph(object):
 
         pygame.image.save(surface, "dijkstra.png")
 
-    def dijkstra_keys(form): # Accepts form params and generates the required dijkstra keys
-        if "graphDetails" not in form.keys(): # new graph
-            newGraph = new_graph()
-            pageKeys = {"graphDetails": newGraph, "start": newGraph[-1], "imageRef": save_graph_image(newGraph)}
+    def dijkstra_keys(self, newConnection): # Generates the required dijkstra keys
+        if newConnection: # old graph: verify that connection is right
+            newConnection = sorted(newConnection)
+            if newConnection == self.next_dijkstra():
+                self.add_traversal(newConnection)
+            else:
+                resultMessage = "Sorry, that is not correct."
+        else: # new graph
+            resultMessage = "Have a go at trying to figure out the next connection!"
+        return {"graphDetails": self.graph_details(), "start": self.start, "imageRef": self.save_graph_image(), "resultMessage": resultMessage}
 
-        else: # adding a connection!
-            currentGraph = form["graphDetails"].value
-            userConnection = form["nextConnection"].value
-            if userConnection[0] > userConnection[1]: # order it
-                userConnection = userConnection[::-1]
-            if next_dijkstra(currentGraph) == userConnection:
-                nextGraph = add_connection(currentGraph, userConnection)
-                save_graph_image(nextGraph)
 
 def html_header():
     return "Content-type: text/html\n\n"
@@ -104,7 +132,11 @@ def main():
     elif "exercise" in form.keys(): # interactive exercise!
         pageName = form["page"].value + "_exercise.html"
         if form["page"].value == "dijkstra":
-            pageKeys = dijkstra_keys(form)
+            if "graphDetails" in form.keys():
+                currentGraph = WeightedGraph(form["graphDetails"])
+                pageKeys = currentGraph.dijkstra_keys(tuple(form["newConnection"]))
+            else:
+                currentGraph = WeightedGraph("")
 
 
     # apparently header is required
@@ -119,6 +151,6 @@ def main():
     print(pageTemplate.substitute(pageKeys))
 
 if __name__ == '__main__':
-    main()
-    #graph = WeightedGraph()
-    #graph.save_graph_image()
+    #main()
+    graph = WeightedGraph()
+    graph.save_graph_image()

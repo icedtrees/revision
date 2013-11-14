@@ -45,7 +45,7 @@ body,td,th {
 </ul>
 <h3><span class="label label-info">Trees</span></h3>
 <ul>
-  <li>Trees</li>
+  <li><a href="?page=trees">Trees</a></li>
   <li>Balancing trees</li>
   <li>Priority queues and heaps</li>
 </ul>
@@ -60,6 +60,7 @@ body,td,th {
 <h3><span class="label label-info">Graphs</span></h3>
 <ul>
   <li>Searching/traversing graphs</li>
+  <li><a href="?page=dijkstra">Dijkstra's algorithm</a></li>
   <li>Directed graphs</li>
   <li>Weighted graphs</li>
 </ul>
