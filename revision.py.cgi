@@ -119,6 +119,6 @@ def main():
     print(pageTemplate.substitute(pageKeys))
 
 if __name__ == '__main__':
-    # main()
-    graph = WeightedGraph()
-    graph.save_graph_image()
+    main()
+    #graph = WeightedGraph()
+    #graph.save_graph_image()
