@@ -76,9 +76,6 @@ class WeightedGraph(object):
 
         pygame.image.save(surface, "dijkstra.png")
 
-    def html_header():
-        return "Content-type: text/html\n\n"
-
     def dijkstra_keys(form): # Accepts form params and generates the required dijkstra keys
         if "graphDetails" not in form.keys(): # new graph
             newGraph = new_graph()
@@ -92,6 +89,9 @@ class WeightedGraph(object):
             if next_dijkstra(currentGraph) == userConnection:
                 nextGraph = add_connection(currentGraph, userConnection)
                 save_graph_image(nextGraph)
+
+def html_header():
+    return "Content-type: text/html\n\n"
 
 def main():
     form = cgi.FieldStorage()
