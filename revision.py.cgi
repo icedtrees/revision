@@ -40,11 +40,11 @@ class WeightedGraph(object):
         details = eval(detailString)
         self.connections = details[0]
         self.traversed = details[1]
-        self.start = details[3]
+        self.start = details[2]
 
     def __init__(self, previousConnections):
         if previousConnections:
-            self.load(details(previousConnections))
+            self.load_details(previousConnections)
         else:
             self.connections = self.new_graph()
             self.traversed = [] # format (start, end)
@@ -70,25 +70,32 @@ class WeightedGraph(object):
             totalDistance = 0
             while (current != self.start):
                 previousMove = (current, stackTrace[current])
-                totalDistance += self.connections[sorted(previousMove)]
-                current = stackTrace(current)
+                totalDistance += self.connections[tuple(sorted(previousMove))]
+                current = stackTrace[current]
             distance[traversal[1]] = totalDistance
         minPoint, minLength = (-1, -1), 1000
         for start in [point for point in range(5) if distance[point] != -1]: # visited
-            for adjacent in [point for point in range(5) if sorted((start, point)) in self.connections and distance[point] == -1]: # unvisited
-                if distance[start] + self.connections[sorted((start, point))] < minLength:
-                    minPoint = sorted((start,adjacent))
-                    minLength = distance[start] + self.connections[sorted((start, point))]
+            for adjacent in range(5):
+                key = tuple(sorted((start, adjacent)))
+                if (key in self.connections.keys()) and distance[adjacent] == -1: # unvisited
+                     if distance[start] + self.connections[key] < minLength:
+                        minPoint = key
+                        minLength = distance[start] + self.connections[key]
+
         return minPoint
 
 
     def save_graph_image(self): # saves the graph as an image and returns filepath
+        pygame.font.init()
+        lengthFont = pygame.font.SysFont("Arial Black", 20)
+
         surface = pygame.Surface((600, 600)) # margin of 50px on all sides
         surface.fill((255, 255, 255))
         for index in range(5):
-            pygame.draw.circle(surface, (0, 0, 0), self.get_position(index), 20, 0)
-        pygame.font.init()
-        lengthFont = pygame.font.SysFont("Arial Black", 20)
+            pointPosition = self.get_position(index)
+            pygame.draw.circle(surface, (0, 0, 0), pointPosition, 20, 0)
+            label = lengthFont.render(str(index), 1, (255, 0, 0))
+            surface.blit(label, pointPosition)
 
         for traversal in self.traversed:
             position0, position1 = self.get_position(traversal[0]), self.get_position(traversal[1])
@@ -104,13 +111,16 @@ class WeightedGraph(object):
             textPosition = [(position0[0] + position1[0]) / 2, (position0[1] + position1[1]) / 2]
             surface.blit(label, textPosition)
 
-        pygame.image.save(surface, "dijkstra.png")
+        pygame.image.save(surface, "../../images/dijkstra.png")
+
+        return "../../images/dijkstra.png"
 
     def dijkstra_keys(self, newConnection): # Generates the required dijkstra keys
         if newConnection: # old graph: verify that connection is right
             newConnection = sorted(newConnection)
-            if newConnection == self.next_dijkstra():
+            if tuple(newConnection) == self.next_dijkstra():
                 self.add_traversal(newConnection)
+                resultMessage = "Well done! Try the next path"
             else:
                 resultMessage = "Sorry, that is not correct."
         else: # new graph
@@ -130,13 +140,14 @@ def main():
     elif "page" in form.keys(): # specific page req'd
         pageName = form["page"].value + ".html"
     elif "exercise" in form.keys(): # interactive exercise!
-        pageName = form["page"].value + "_exercise.html"
-        if form["page"].value == "dijkstra":
+        pageName = form["exercise"].value + "_exercise.html"
+        if form["exercise"].value == "dijkstra":
             if "graphDetails" in form.keys():
-                currentGraph = WeightedGraph(form["graphDetails"])
-                pageKeys = currentGraph.dijkstra_keys(tuple(form["newConnection"]))
+                currentGraph = WeightedGraph(form["graphDetails"].value)
+                pageKeys = currentGraph.dijkstra_keys(eval(form["nextConnection"].value))
             else:
                 currentGraph = WeightedGraph("")
+                pageKeys = currentGraph.dijkstra_keys(())
 
 
     # apparently header is required
